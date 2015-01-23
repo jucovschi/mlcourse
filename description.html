@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title></title>
+	<meta name="generator" content="LibreOffice 4.2.5.2 (Linux)">
+	<meta name="created" content="20150118;183737552727631">
+	<meta name="changed" content="20150123;200906158093404">
+	<style type="text/css">
+	<!--
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+                .content { max-width: 800px; margin: 0px auto; }
+                
+	-->
+	</style>
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+
+</head>
+<body lang="en-US" dir="ltr" max-width=800px>
+<div class="content">
+<h1>Cleaning Data</h1>
+<p >A first glance at
+the training CSV file showed the following issues</p>
+<ol>
+	<li>some cell
+	values were written as “#DIV/0”</li>
+	<li>some cell
+	values were empty strings  “”</li>
+</ol>
+<p >Both types of cells
+did not provide any useful information and hence were set to NA. 
+</p>
+<p >Next step was to
+make sure that all columns had the right type. This included 
+</p>
+<ol>
+	<li>marking columns
+	“user_name”, “new_window” and “classe” as factors</li>
+	<li>marking columns
+	that contain only numbers and NA as numerical</li>
+</ol>
+<p >
+</p>
+<h1>Feature extraction</h1>
+<p >A quick summary
+showed that from 160 original variables, only 60 had no missing
+values. The rest 100 variables had over 16000 missing values from
+19000+ observations. I observed that the “new_window” variable
+was a good predictor on whether the rest 100 variables are missing or
+not. I  suspect that the 100 variables should be copied over to other
+records based on the num_window variable but I did not continue
+investigating this possibility. The reason for it is that the 100
+variables are missing in all test cases (pml-testing). Hence training
+a model that uses one of these variables would be useless/ineffective
+on the testing cases. As a conclusion, I just removed the 100
+variables from the dataset. 
+</p>
+<p>A simple plot of the
+“X” (index) variable colored by variable “classe” made it
+clear that there is a strong dependency between index and classe
+which is due to the way data was collected and should not be used for
+building the model. Similar I removed variables
+“raw_timestamp_part_1”, “raw_timestamp_part_2”, “num_window”
+as these also were artifacts of data collection and that should not
+be used for model building.</p>
+<p>
+</p>
+<p>Another aspect was
+that the training observations are related by time and normally this
+relation should be taken into consideration when building a model.
+The problem is that such a model would also require time related test
+observations. Our testing data provided only snapshots of 1
+observation. Hence I decided to also drop the time relation among
+observation and assume they are independent. 
+</p>
+
+<p>The next observation
+was that individuals in the training set matched the individuals in
+the testing set. This gave me the opportunity of creating
+personalized models i.e. one model per user. The motivation for it
+was the following: creating a generic model would require normalizing
+sensor readings in some way to account for physical differences among
+users e.g. arm length/strenth/speed of executing the excercises. A
+personal model, on the other hand, does not require normalization.
+Each user has a bit over 3000 observation – which is big enough for
+building a personalized model.</p>
+
+<h1>Algorithm:</h1>
+<p>I used random
+forests to build personalized models for each user in the training
+set. I performed a K-fold cross validation (k=10) for each person and
+the accuracy was &gt;99%. This gave me confidence that the model
+didn't overfit the data and that the out of sample accuracy would be
+high as well. So I created a model based on random forests for each
+user and applied it to the test dataset.</p>
+
+<h1>Evaluation</h1>
+<p >Got 20/20 points.</p>
+</div>
+</body>
+</html>
